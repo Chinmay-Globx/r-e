@@ -23,7 +23,7 @@ const Sidebar = () => {
     const role = currentUser?.role;
     
     const allItems = [
-      { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['admin', 'backup_office'] },
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['admin', 'backup_office', 'godown_incharge', 'dispatcher', 'delivery_man'] },
       { icon: Package, label: 'Orders', path: '/orders', roles: ['admin', 'backup_office'] },
       { icon: Package, label: 'Stock & DO', path: '/godown', roles: ['admin', 'godown_incharge'] },
       { icon: Truck, label: 'Dispatch', path: '/dispatch', roles: ['admin', 'dispatcher'] },
