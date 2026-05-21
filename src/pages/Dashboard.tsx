@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { useStore } from '../store';
-import { Package, Truck, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { Package, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import { format } from 'date-fns';
 

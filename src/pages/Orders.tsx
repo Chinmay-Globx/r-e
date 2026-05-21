@@ -6,7 +6,7 @@ import { useStore } from '../store';
 import { Plus, Search } from 'lucide-react';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import { format } from 'date-fns';
-import type { Order, Customer, OrderItem } from '../types';
+import type { Order, OrderItem } from '../types';
 
 const Orders = () => {
   const { orders, customers, currentUser, addOrder, addCustomer } = useStore();
