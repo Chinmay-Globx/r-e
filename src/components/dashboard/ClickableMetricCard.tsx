@@ -44,9 +44,9 @@ export const ClickableMetricCard = ({
 
   const variantStyles = {
     default: 'hover:border-primary/50',
-    success: 'hover:border-green-500/50 border-green-500/20',
-    warning: 'hover:border-yellow-500/50 border-yellow-500/20',
-    danger: 'hover:border-red-500/50 border-red-500/20',
+    success: 'hover:border-success/50 border-success/20',
+    warning: 'hover:border-warning/50 border-warning/20',
+    danger: 'hover:border-destructive/50 border-destructive/20',
   };
 
   return (
@@ -81,7 +81,7 @@ export const ClickableMetricCard = ({
             <div
               className={cn(
                 'flex items-center gap-1 text-xs font-medium',
-                trend.direction === 'up' ? 'text-green-600' : 'text-red-600'
+                trend.direction === 'up' ? 'text-success' : 'text-destructive'
               )}
             >
               {trend.direction === 'up' ? (
