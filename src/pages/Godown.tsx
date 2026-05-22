@@ -56,50 +56,59 @@ const Godown = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h1 className="text-3xl font-bold">Stock & DO Management</h1>
-        <p className="text-muted-foreground">Manage inventory and delivery orders</p>
+        <h1 className="text-3xl font-bold text-gray-900">Stock & DO Management</h1>
+        <p className="text-gray-600">Manage inventory and delivery orders</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-2 shadow-soft hover-lift bg-gradient-to-br from-white to-amber-50/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-700">Pending Orders</CardTitle>
+            <div className="bg-amber-500 p-2 rounded-full">
+              <Package className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrders.length}</div>
+            <div className="text-2xl font-bold text-amber-700">{pendingOrders.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 shadow-soft hover-lift bg-gradient-to-br from-white to-sky-50/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">DO Raised</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-700">DO Raised</CardTitle>
+            <div className="bg-sky-500 p-2 rounded-full">
+              <CheckCircle className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{doRaisedOrders.length}</div>
+            <div className="text-2xl font-bold text-sky-700">{doRaisedOrders.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 shadow-soft hover-lift bg-gradient-to-br from-white to-rose-50/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Not Available</CardTitle>
-            <XCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-700">Not Available</CardTitle>
+            <div className="bg-rose-500 p-2 rounded-full">
+              <XCircle className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orders.filter(o => o.status === 'not_available').length}</div>
+            <div className="text-2xl font-bold text-rose-700">{orders.filter(o => o.status === 'not_available').length}</div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>New Orders - Raise DO</CardTitle>
+        <Card className="border-2 shadow-soft bg-gradient-to-br from-white to-amber-50/30">
+          <CardHeader className="border-b bg-gradient-to-r from-amber-50 to-orange-50">
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-amber-600" />
+              New Orders - Raise DO
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4 bg-white/50 backdrop-blur-sm">
             <div className="space-y-3">
               {pendingOrders.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No pending orders</p>

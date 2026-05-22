@@ -21,10 +21,10 @@ const Users = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage system users and roles</p>
+        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+        <p className="text-gray-600">Manage system users and roles</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

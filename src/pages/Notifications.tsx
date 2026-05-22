@@ -19,11 +19,11 @@ const Notifications = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground">Stay updated with order status changes</p>
+          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+          <p className="text-gray-600">Stay updated with order status changes</p>
         </div>
         {unreadNotifications.length > 0 && (
           <Button onClick={handleMarkAllAsRead} variant="outline">

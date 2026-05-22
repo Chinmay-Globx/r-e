@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useStore } from '../store';
-import { Plus, Search, X } from 'lucide-react';
+import { Plus, Search, X, AlertCircle } from 'lucide-react';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import { format } from 'date-fns';
 import type { Order, OrderItem } from '../types';
@@ -101,27 +101,27 @@ const Orders = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Orders</h1>
-          <p className="text-muted-foreground">Manage and track all orders</p>
+          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
+          <p className="text-gray-600">Manage and track all orders</p>
         </div>
-        <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+        <Button onClick={() => setShowCreateForm(!showCreateForm)} className="shadow-soft hover:shadow-medium transition-shadow">
           <Plus className="mr-2 h-4 w-4" />
           Create Order
         </Button>
       </div>
 
       {hasActiveFilters && (
-        <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg border border-border">
-          <span className="text-sm font-medium">Active Filters:</span>
-          <span className="text-sm text-muted-foreground">{getFilterDescription()}</span>
+        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border-2 border-blue-200 animate-scale-in">
+          <span className="text-sm font-semibold text-blue-900">Active Filters:</span>
+          <span className="text-sm text-blue-700">{getFilterDescription()}</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="ml-auto"
+            className="ml-auto hover:bg-blue-100"
           >
             <X className="h-4 w-4 mr-1" />
             Clear Filters
@@ -130,11 +130,11 @@ const Orders = () => {
       )}
 
       {showCreateForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Order</CardTitle>
+        <Card className="border-2 shadow-medium animate-scale-in bg-gradient-to-br from-white to-purple-50/30">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 border-b-2">
+            <CardTitle className="text-gray-900">Create New Order</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-white/50 backdrop-blur-sm">
             <form onSubmit={handleCreateOrder} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -205,57 +205,60 @@ const Orders = () => {
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-soft bg-gradient-to-br from-white to-gray-50/50">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 border-b-2">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search orders by ID or customer..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-2 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
               />
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4 bg-white/50 backdrop-blur-sm">
           <div className="space-y-3">
             {filteredOrders.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No orders found</p>
+              <p className="text-center text-gray-500 py-8">No orders found</p>
             ) : (
               filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-soft transition-all duration-200 cursor-pointer bg-white"
                   onClick={() => setSelectedOrder(order)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold">{order.id}</h3>
+                        <h3 className="font-semibold text-gray-900">{order.id}</h3>
                         <OrderStatusBadge status={order.status} />
                       </div>
-                      <p className="text-sm text-muted-foreground">{order.customer.name}</p>
-                      <p className="text-sm text-muted-foreground">{order.customer.phone}</p>
-                      <div className="mt-2">
+                      <p className="text-sm text-gray-700">{order.customer.name}</p>
+                      <p className="text-sm text-gray-600">{order.customer.phone}</p>
+                      <div className="mt-2 space-y-1">
                         {order.items.map((item) => (
-                          <p key={item.id} className="text-sm">
+                          <p key={item.id} className="text-sm text-gray-800 bg-gray-50 px-2 py-1 rounded">
                             {item.productName} - Qty: {item.quantity}
                             {item.rollCount && ` (Rolls: ${item.rollCount})`}
                           </p>
                         ))}
                       </div>
                     </div>
-                    <div className="text-right text-sm text-muted-foreground">
-                      <p>{format(new Date(order.createdAt), 'MMM dd, yyyy')}</p>
-                      <p>{format(new Date(order.createdAt), 'HH:mm')}</p>
+                    <div className="text-right text-sm text-gray-600">
+                      <p className="font-medium">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</p>
+                      <p className="text-gray-500">{format(new Date(order.createdAt), 'HH:mm')}</p>
                     </div>
                   </div>
                   {order.unavailableReason && (
-                    <div className="mt-3 p-2 bg-destructive/10 border border-destructive/20 rounded text-sm">
-                      <p className="font-medium text-destructive">Not Available</p>
-                      <p className="text-muted-foreground">{order.unavailableReason}</p>
+                    <div className="mt-3 p-3 bg-rose-50 border-2 border-rose-200 rounded-lg text-sm">
+                      <p className="font-semibold text-rose-700 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        Not Available
+                      </p>
+                      <p className="text-rose-600 mt-1">{order.unavailableReason}</p>
                     </div>
                   )}
                 </div>

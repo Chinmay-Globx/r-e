@@ -53,15 +53,15 @@ const Sidebar = () => {
 
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 h-screen bg-card border-r border-border flex flex-col transition-transform duration-300 z-40",
+          "fixed lg:sticky top-0 left-0 h-screen bg-white border-r-2 border-gray-200 flex flex-col transition-transform duration-300 z-40 shadow-medium",
           "w-64",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="p-6 border-b border-border">
-          <h1 className="text-xl font-bold">RASMI ERP</h1>
-          <p className="text-xs text-muted-foreground mt-1">{currentUser?.name}</p>
-          <p className="text-xs text-muted-foreground capitalize">{currentUser?.role?.replace('_', ' ')}</p>
+        <div className="p-6 border-b-2 border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <h1 className="text-xl font-bold text-gray-900">RASMI ERP</h1>
+          <p className="text-xs text-gray-700 mt-1 font-medium">{currentUser?.name}</p>
+          <p className="text-xs text-gray-600 capitalize">{currentUser?.role?.replace('_', ' ')}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -75,10 +75,10 @@ const Sidebar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-soft"
+                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 )}
               >
                 <Icon size={18} />
@@ -88,10 +88,10 @@ const Sidebar = () => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t-2 border-gray-200">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-rose-50 hover:text-rose-700 w-full transition-all duration-200"
           >
             <LogOut size={18} />
             Logout

@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { useStore } from '../store';
-import { Package, CheckCircle, AlertCircle, TrendingUp, Users, Clock, Truck, Box, Plus, FileText, UserPlus } from 'lucide-react';
+import { Package, CheckCircle, AlertCircle, TrendingUp, Users, Clock, Truck, Box, Plus, FileText, UserPlus, BarChart3, PieChart } from 'lucide-react';
 import OrderStatusBadge from '../components/OrderStatusBadge';
-import { format } from 'date-fns';
-import { ClickableMetricCard } from '../components/dashboard/ClickableMetricCard';
+import { format, subDays, startOfDay } from 'date-fns';
+import MetricCard from '../components/dashboard/MetricCard';
 import { QuickActionBar } from '../components/dashboard/QuickActionBar';
 import { QuickOrderModal } from '../components/modals/QuickOrderModal';
+import { BarChart, Bar, LineChart, Line, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
   const { orders, activityLogs, currentUser, users } = useStore();
@@ -47,6 +48,40 @@ const AdminDashboard = ({ orders, activityLogs, users }: any) => {
   const recentOrders = orders.slice(0, 6);
   const recentActivity = activityLogs.slice(0, 10);
 
+  // Chart data preparation
+  const statusDistribution = useMemo(() => [
+    { name: 'New', value: stats.newOrders, color: '#f59e0b' },
+    { name: 'DO Raised', value: orders.filter((o: any) => o.status === 'do_raised').length, color: '#0ea5e9' },
+    { name: 'Roll Ready', value: orders.filter((o: any) => o.status === 'roll_ready').length, color: '#8b5cf6' },
+    { name: 'Dispatched', value: orders.filter((o: any) => o.status === 'dispatched').length, color: '#6366f1' },
+    { name: 'Delivered', value: stats.delivered, color: '#10b981' },
+    { name: 'Not Available', value: stats.notAvailable, color: '#f43f5e' },
+  ], [orders, stats]);
+
+  const last7DaysData = useMemo(() => {
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = subDays(new Date(), i);
+      const dateStr = startOfDay(date).toDateString();
+      const dayOrders = orders.filter((o: any) => new Date(o.createdAt).toDateString() === dateStr);
+      const dayDelivered = orders.filter((o: any) => o.deliveredAt && new Date(o.deliveredAt).toDateString() === dateStr);
+      
+      data.push({
+        date: format(date, 'MMM dd'),
+        orders: dayOrders.length,
+        delivered: dayDelivered.length,
+      });
+    }
+    return data;
+  }, [orders]);
+
+  const performanceData = useMemo(() => [
+    { metric: 'Total Orders', value: stats.totalOrders, color: '#3b82f6' },
+    { metric: 'Delivered', value: stats.delivered, color: '#10b981' },
+    { metric: 'In Progress', value: stats.inProgress, color: '#0ea5e9' },
+    { metric: 'Pending', value: stats.newOrders, color: '#f59e0b' },
+  ], [stats]);
+
   const quickActions = [
     {
       label: 'Create Order',
@@ -80,81 +115,200 @@ const AdminDashboard = ({ orders, activityLogs, users }: any) => {
       <QuickOrderModal isOpen={showOrderModal} onClose={() => setShowOrderModal(false)} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ClickableMetricCard
+        <MetricCard
           title="Total Orders"
           value={stats.totalOrders}
           description="All time"
-          icon={<Package className="h-4 w-4 text-muted-foreground" />}
+          icon={Package}
+          gradient="blue"
           href="/orders"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="New Orders"
           value={stats.newOrders}
           description="Awaiting processing"
-          icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
+          icon={AlertCircle}
+          gradient="amber"
           href="/orders?status=new"
-          variant="warning"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="In Progress"
           value={stats.inProgress}
           description="Active pipeline"
-          icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+          icon={TrendingUp}
+          gradient="sky"
           href="/orders?status=do_raised,roll_ready,dispatched"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Delivered"
           value={stats.delivered}
           description="Completed"
-          icon={<CheckCircle className="h-4 w-4 text-muted-foreground" />}
+          icon={CheckCircle}
+          gradient="emerald"
           href="/orders?status=delivered"
-          variant="success"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Today's Orders"
           value={stats.todayOrders}
           description="Created today"
-          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          icon={Clock}
+          gradient="purple"
           href="/orders?date=today"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Today's Deliveries"
           value={stats.todayDelivered}
           description="Delivered today"
-          icon={<Truck className="h-4 w-4 text-muted-foreground" />}
+          icon={Truck}
+          gradient="emerald"
           href="/orders?status=delivered&date=today"
-          variant="success"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Not Available"
           value={stats.notAvailable}
           description="Out of stock"
-          icon={<AlertCircle className="h-4 w-4 text-destructive" />}
+          icon={AlertCircle}
+          gradient="rose"
           href="/orders?status=not_available"
-          variant="danger"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Active Users"
           value={stats.activeUsers}
           description="System users"
-          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          icon={Users}
+          gradient="indigo"
           href="/users"
         />
       </div>
 
+      {/* Analytics Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
+        {/* Order Status Distribution - Pie Chart */}
+        <Card className="border-2 shadow-soft bg-gradient-to-br from-white to-purple-50/30">
+          <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-purple-600" />
+              Order Status Distribution
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6 bg-white/50 backdrop-blur-sm">
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPie>
+                <Pie
+                  data={statusDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {statusDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RechartsPie>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Performance Overview - Bar Chart */}
+        <Card className="border-2 shadow-soft bg-gradient-to-br from-white to-blue-50/30">
+          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-cyan-50">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Performance Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 bg-white/50 backdrop-blur-sm">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={performanceData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="metric" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                  {performanceData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 7-Day Trend - Line Chart */}
+      <Card className="border-2 shadow-soft bg-gradient-to-br from-white to-emerald-50/30">
+        <CardHeader className="border-b bg-gradient-to-r from-emerald-50 to-teal-50">
+          <CardTitle className="flex items-center gap-2">
+            <PieChart className="h-5 w-5 text-emerald-600" />
+            7-Day Order Trend
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6 bg-white/50 backdrop-blur-sm">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={last7DaysData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="date" stroke="#6b7280" />
+              <YAxis stroke="#6b7280" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="orders" 
+                stroke="#3b82f6" 
+                strokeWidth={3}
+                dot={{ fill: '#3b82f6', r: 5 }}
+                activeDot={{ r: 7 }}
+                name="Orders Created"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="delivered" 
+                stroke="#10b981" 
+                strokeWidth={3}
+                dot={{ fill: '#10b981', r: 5 }}
+                activeDot={{ r: 7 }}
+                name="Orders Delivered"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border-2 shadow-soft hover-lift bg-gradient-to-br from-white to-blue-50/30">
+          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50">
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-blue-600" />
+              Recent Orders
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4 bg-white/50 backdrop-blur-sm">
             <div className="space-y-3">
               {recentOrders.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">No orders yet</p>
@@ -162,12 +316,12 @@ const AdminDashboard = ({ orders, activityLogs, users }: any) => {
                 recentOrders.map((order: any) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between p-3 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-soft transition-all duration-200 cursor-pointer bg-white"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{order.id}</p>
-                      <p className="text-xs text-muted-foreground">{order.customer.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-semibold text-sm text-gray-900">{order.id}</p>
+                      <p className="text-xs text-gray-600">{order.customer.name}</p>
+                      <p className="text-xs text-gray-500">
                         {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}
                       </p>
                     </div>
@@ -179,21 +333,24 @@ const AdminDashboard = ({ orders, activityLogs, users }: any) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>System Activity</CardTitle>
+        <Card className="border-2 shadow-soft hover-lift bg-gradient-to-br from-white to-emerald-50/30">
+          <CardHeader className="border-b bg-gradient-to-r from-emerald-50 to-sky-50">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-emerald-600" />
+              System Activity
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4 bg-white/50 backdrop-blur-sm">
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
               {recentActivity.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">No activity yet</p>
               ) : (
                 recentActivity.map((log: any) => (
-                  <div key={log.id} className="flex gap-3 text-sm">
-                    <div className="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-primary" />
+                  <div key={log.id} className="flex gap-3 text-sm p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-500" />
                     <div className="flex-1">
-                      <p className="font-medium">{log.action}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-medium text-gray-900">{log.action}</p>
+                      <p className="text-xs text-gray-600">
                         {log.userName} • {format(new Date(log.timestamp), 'MMM dd, HH:mm')}
                       </p>
                     </div>
@@ -254,56 +411,58 @@ const BackupOfficeDashboard = ({ orders, currentUser }: any) => {
       <QuickOrderModal isOpen={showOrderModal} onClose={() => setShowOrderModal(false)} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <ClickableMetricCard
+        <MetricCard
           title="My Total Orders"
           value={stats.myTotal}
           description="Orders created by you"
-          icon={<Package className="h-4 w-4 text-muted-foreground" />}
+          icon={Package}
+          gradient="blue"
           href="/orders?createdBy=me"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Today's Orders"
           value={stats.todayCreated}
           description="Created today"
-          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          icon={Clock}
+          gradient="purple"
           href="/orders?createdBy=me&date=today"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Pending"
           value={stats.pending}
           description="Awaiting processing"
-          icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />}
+          icon={AlertCircle}
+          gradient="amber"
           href="/orders?createdBy=me&status=new"
-          variant="warning"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="In Transit"
           value={stats.inTransit}
           description="Being processed"
-          icon={<Truck className="h-4 w-4 text-muted-foreground" />}
+          icon={Truck}
+          gradient="sky"
           href="/orders?createdBy=me&status=do_raised,roll_ready,dispatched"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Delivered"
           value={stats.delivered}
           description="Successfully completed"
-          icon={<CheckCircle className="h-4 w-4 text-muted-foreground" />}
+          icon={CheckCircle}
+          gradient="emerald"
           href="/orders?createdBy=me&status=delivered"
-          variant="success"
         />
 
-        <ClickableMetricCard
+        <MetricCard
           title="Needs Attention"
           value={stats.notAvailable}
           description="Items not available"
-          icon={<AlertCircle className="h-4 w-4 text-destructive" />}
+          icon={AlertCircle}
+          gradient="rose"
           href="/orders?createdBy=me&status=not_available"
-          variant="danger"
-          className={stats.notAvailable > 0 ? 'border-destructive' : ''}
         />
       </div>
 
