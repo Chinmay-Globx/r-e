@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useStore } from '../store';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import { format } from 'date-fns';
 import type { Order, OrderItem } from '../types';
+import { useFilters } from '../hooks/useFilters';
+import { filterOrders } from '../utils/filterOrders';
 
 const Orders = () => {
   const { orders, customers, currentUser, addOrder, addCustomer } = useStore();
+  const { filters, clearFilters, hasActiveFilters } = useFilters();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -23,10 +26,20 @@ const Orders = () => {
     quantity: '',
   });
 
-  const filteredOrders = orders.filter(order =>
+  // Apply URL filters first, then search term
+  const urlFilteredOrders = filterOrders(orders, filters, currentUser?.id);
+  
+  const filteredOrders = urlFilteredOrders.filter(order =>
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customer.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Update search term when filter changes
+  useEffect(() => {
+    if (filters.search) {
+      setSearchTerm(filters.search);
+    }
+  }, [filters.search]);
 
   const handleCreateOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +85,21 @@ const Orders = () => {
     });
   };
 
+  const getFilterDescription = () => {
+    const parts: string[] = [];
+    if (filters.status) {
+      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
+      parts.push(`Status: ${statuses.join(', ')}`);
+    }
+    if (filters.date) {
+      parts.push(`Date: ${filters.date}`);
+    }
+    if (filters.createdBy === 'me') {
+      parts.push('Created by: Me');
+    }
+    return parts.join(' • ');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -84,6 +112,22 @@ const Orders = () => {
           Create Order
         </Button>
       </div>
+
+      {hasActiveFilters && (
+        <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg border border-border">
+          <span className="text-sm font-medium">Active Filters:</span>
+          <span className="text-sm text-muted-foreground">{getFilterDescription()}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="ml-auto"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Clear Filters
+          </Button>
+        </div>
+      )}
 
       {showCreateForm && (
         <Card>
